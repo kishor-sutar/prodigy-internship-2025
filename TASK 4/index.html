@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sudoku Solver</title>
+    <style>
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .grid {
+            border: 2px solid #333;
+            border-collapse: collapse;
+            background-color: white;
+        }
+
+        .cell {
+            width: 40px;
+            height: 40px;
+            text-align: center;
+            border: 1px solid #999;
+            font-size: 20px;
+        }
+
+        .cell:nth-child(3n) {
+            border-right: 2px solid #333;
+        }
+
+        tr:nth-child(3n) td {
+            border-bottom: 2px solid #333;
+        }
+
+        input::-webkit-outer-spin-button,
+        input::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
+        input[type=number] {
+            -moz-appearance: textfield;
+        }
+
+        .controls {
+            display: flex;
+            gap: 10px;
+        }
+
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Sudoku Solver</h1>
+        <table class="grid">
+            <tbody id="gridBody"></tbody>
+        </table>
+        <div class="controls">
+            <button onclick="solve()">Solve</button>
+            <button onclick="clearGrid()">Clear</button>
+        </div>
+    </div>
+
+    <script>
+        // Initialize the grid
+        function createGrid() {
+            const gridBody = document.getElementById('gridBody');
+            for (let i = 0; i < 9; i++) {
+                const row = document.createElement('tr');
+                for (let j = 0; j < 9; j++) {
+                    const cell = document.createElement('td');
+                    const input = document.createElement('input');
+                    input.type = 'number';
+                    input.min = 1;
+                    input.max = 9;
+                    input.className = 'cell';
+                    input.addEventListener('input', restrictInput);
+                    cell.appendChild(input);
+                    row.appendChild(cell);
+                }
+                gridBody.appendChild(row);
+            }
+        }
+
+        function restrictInput(e) {
+            if (!e.target.value.match(/^[1-9]?$/)) {
+                e.target.value = '';
+            }
+        }
+
+        function readGrid() {
+            const inputs = document.querySelectorAll('.cell');
+            const grid = [];
+            for (let i = 0; i < 9; i++) {
+                grid[i] = [];
+                for (let j = 0; j < 9; j++) {
+                    const val = inputs[i * 9 + j].value;
+                    grid[i][j] = val === '' ? 0 : parseInt(val, 10);
+                }
+            }
+            return grid;
+        }
+
+        function fillGrid(grid) {
+            const inputs = document.querySelectorAll('.cell');
+            for (let i = 0; i < 9; i++) {
+                for (let j = 0; j < 9; j++) {
+                    inputs[i * 9 + j].value = grid[i][j] || '';
+                }
+            }
+        }
+
+        function isValid(board, row, col, num) {
+            // Check row
+            for (let i = 0; i < 9; i++) {
+                if (board[row][i] === num) return false;
+            }
+            
+            // Check column
+            for (let i = 0; i < 9; i++) {
+                if (board[i][col] === num) return false;
+            }
+            
+            // Check 3x3 box
+            const startRow = Math.floor(row / 3) * 3;
+            const startCol = Math.floor(col / 3) * 3;
+            for (let i = 0; i < 3; i++) {
+                for (let j = 0; j < 3; j++) {
+                    if (board[startRow + i][startCol + j] === num) return false;
+                }
+            }
+            
+            return true;
+        }
+
+        function solveSudoku(board) {
+            for (let row = 0; row < 9; row++) {
+                for (let col = 0; col < 9; col++) {
+                    if (board[row][col] === 0) {
+                        for (let num = 1; num <= 9; num++) {
+                            if (isValid(board, row, col, num)) {
+                                board[row][col] = num;
+                                if (solveSudoku(board)) {
+                                    return true;
+                                }
+                                board[row][col] = 0;
+                            }
+                        }
+                        return false;
+                    }
+                }
+            }
+            return true;
+        }
+
+        function solve() {
+            const grid = readGrid();
+            if (solveSudoku(grid)) {
+                fillGrid(grid);
+            } else {
+                alert('No solution exists for this Sudoku puzzle!');
+            }
+        }
+
+        function clearGrid() {
+            const inputs = document.querySelectorAll('.cell');
+            inputs.forEach(input => input.value = '');
+        }
+
+        // Initialize the grid when page loads
+        createGrid();
+    </script>
+</body>
+</html>

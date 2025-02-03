@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Guess the Number</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background: linear-gradient(to right, #6a11cb, #2575fc);
+            color: white;
+            margin: 0;
+            padding: 0;
+        }
+        #game-container {
+            margin: 50px auto;
+            max-width: 400px;
+            padding: 20px;
+            border-radius: 10px;
+            background: rgba(0, 0, 0, 0.8);
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.5);
+        }
+        input, button {
+            padding: 10px;
+            font-size: 16px;
+            border: none;
+            border-radius: 5px;
+            margin: 10px;
+        }
+        button {
+            background: #4CAF50;
+            color: white;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #45a049;
+        }
+        #feedback {
+            margin-top: 20px;
+            font-size: 18px;
+        }
+        #attempts {
+            margin-top: 10px;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div id="game-container">
+        <h1>Guess the Number</h1>
+        <p>I have chosen a number between 1 and 100. Can you guess it?</p>
+        <input type="number" id="guess-input" placeholder="Enter your guess" />
+        <button onclick="submitGuess()">Guess</button>
+        <div id="feedback"></div>
+        <div id="attempts"></div>
+    </div>
+
+    <script>
+        // Generate a random number between 1 and 100
+        const numberToGuess = Math.floor(Math.random() * 100) + 1;
+        let attempts = 0;
+
+        function submitGuess() {
+            const userGuess = document.getElementById("guess-input").value;
+            const feedback = document.getElementById("feedback");
+            const attemptsDisplay = document.getElementById("attempts");
+
+            if (!userGuess) {
+                feedback.textContent = "Please enter a number.";
+                return;
+            }
+
+            attempts++;
+
+            if (userGuess < numberToGuess) {
+                feedback.textContent = "Too low! Try again.";
+            } else if (userGuess > numberToGuess) {
+                feedback.textContent = "Too high! Try again.";
+            } else {
+                feedback.textContent = `Congratulations! You guessed it in ${attempts} attempts. 🎉`;
+                feedback.style.color = "lime";
+                document.getElementById("guess-input").disabled = true;
+            }
+
+            attemptsDisplay.textContent = `Attempts: ${attempts}`;
+        }
+    </script>
+</body>
+</html>

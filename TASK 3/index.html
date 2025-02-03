@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contact Management System</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            width: 80%;
+            margin: auto;
+            overflow: hidden;
+        }
+        header {
+            background: #333;
+            color: #fff;
+            padding-top: 30px;
+            min-height: 70px;
+            border-bottom: #77aaff 3px solid;
+        }
+        header a {
+            color: #fff;
+            text-decoration: none;
+            text-transform: uppercase;
+            font-size: 16px;
+        }
+        header ul {
+            padding: 0;
+            list-style: none;
+        }
+        header li {
+            float: left;
+            display: inline;
+            padding: 0 20px 0 20px;
+        }
+        header #branding {
+            float: left;
+        }
+        header #branding h1 {
+            margin: 0;
+        }
+        header nav {
+            float: right;
+            margin-top: 10px;
+        }
+        .main {
+            padding: 20px;
+            background: #fff;
+            margin-top: 20px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+        }
+        .form-group input {
+            width: 100%;
+            padding: 8px;
+            box-sizing: border-box;
+        }
+        .btn {
+            display: inline-block;
+            background: #333;
+            color: #fff;
+            padding: 10px 20px;
+            text-decoration: none;
+            cursor: pointer;
+        }
+        .btn:hover {
+            background: #555;
+        }
+        table {
+            width: 100%;
+            margin-top: 20px;
+            border-collapse: collapse;
+        }
+        table, th, td {
+            border: 1px solid #ddd;
+        }
+        th, td {
+            padding: 10px;
+            text-align: left;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <div id="branding">
+                <h1>Contact Management System</h1>
+            </div>
+            <nav>
+                <ul>
+                    <li><a href="#">Home</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+    <div class="container main">
+        <h2>Add New Contact</h2>
+        <div class="form-group">
+            <label for="name">Name:</label>
+            <input type="text" id="name">
+        </div>
+        <div class="form-group">
+            <label for="phone">Phone:</label>
+            <input type="text" id="phone">
+        </div>
+        <div class="form-group">
+            <label for="email">Email:</label>
+            <input type="text" id="email">
+        </div>
+        <button class="btn" onclick="addContact()">Add Contact</button>
+        <button class="btn" onclick="exportToCSV()">Export to CSV</button>
+        <input type="file" id="fileInput" style="display:none" onchange="importFromCSV(event)">
+        <button class="btn" onclick="document.getElementById('fileInput').click()">Import from CSV</button>
+        <h2>Contact List</h2>
+        <table id="contactTable">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Phone</th>
+                    <th>Email</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+            
+            </tbody>
+        </table>
+    </div>
+    <script>
+        let contacts = [];
+
+        function addContact() {
+            const name = document.getElementById('name').value;
+            const phone = document.getElementById('phone').value;
+            const email = document.getElementById('email').value;
+
+            if (name && phone && email) {
+                const contact = { name, phone, email };
+                contacts.push(contact);
+                updateTable();
+                clearInputs();
+            } else {
+                alert("Please enter valid contact information.");
+            }
+        }
+
+        function updateTable() {
+            const tableBody = document.getElementById('contactTable').getElementsByTagName('tbody')[0];
+            tableBody.innerHTML = '';
+            contacts.forEach((contact, index) => {
+                const row = tableBody.insertRow();
+                row.insertCell(0).innerText = contact.name;
+                row.insertCell(1).innerText = contact.phone;
+                row.insertCell(2).innerText = contact.email;
+                const actionsCell = row.insertCell(3);
+                actionsCell.innerHTML = `<button onclick="editContact(${index})">Edit</button>
+                                         <button onclick="deleteContact(${index})">Delete</button>`;
+            });
+        }
+
+        function clearInputs() {
+            document.getElementById('name').value = '';
+            document.getElementById('phone').value = '';
+            document.getElementById('email').value = '';
+        }
+
+        function editContact(index) {
+            const contact = contacts[index];
+            document.getElementById('name').value = contact.name;
+            document.getElementById('phone').value = contact.phone;
+            document.getElementById('email').value = contact.email;
+            contacts.splice(index, 1);
+            updateTable();
+        }
+
+        function deleteContact(index) {
+            contacts.splice(index, 1);
+            updateTable();
+        }
+
+        function exportToCSV() {
+            const csvContent = "data:text/csv;charset=utf-8," + contacts.map(contact => {
+                return Object.values(contact).join(",");
+            }).join("\n");
+
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", "contacts.csv");
+            document.body.appendChild(link); 
+            link.click();
+            document.body.removeChild(link); 
+        }
+
+        function importFromCSV(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const text = e.target.result;
+                const rows = text.split("\n");
+                contacts = rows.map(row => {
+                    const [name, phone, email] = row.split(",");
+                    return { name, phone, email };
+                }).filter(contact => contact.name && contact.phone && contact.email);
+                updateTable();
+            };
+            reader.readAsText(file);
+        }
+    </script>
+</body>
+</html>
